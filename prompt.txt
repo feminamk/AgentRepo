@@ -1,1 +1,81 @@
 gg
+Required parsing behavior
+
+The parser must inspect the complete DOCX, including:
+
+* all tables,
+* all rows,
+* all cells,
+* text embedded inside cells,
+* multiline cell contents.
+
+It must NOT rely only on exact standalone label/value pairs.
+
+For the sample intake form:
+
+JIRA Description → jira_description
+
+Fix Version → fix_version
+
+Schedule (ORC Based / BD day) must determine the schedule type.
+
+If the cell contains ORC Based, set:
+
+schedule_type = "ORC Based"
+
+If the cell contains BD Based, set:
+
+schedule_type = "BD Based"
+
+When ORC Based is selected, extract:
+
+Target Table: → orc_target_table
+
+Dependency: → orc_dependency
+
+For the sample form these should become:
+
+orc_target_table = "PS_BMO_DEPT_MAP"
+
+orc_dependency = "PS_BMO_DEPT_MAP"
+
+From the Glue/Lambda Job Name cell, independently extract:
+
+Glue: → glue_job_name
+
+Lambda: → lambda_function_name
+
+If an IAM role is present in the same cell, extract it separately as:
+
+glue_execution_iam_role
+
+Also extract:
+
+DAG Trigger Frequency → dag_trigger_frequency
+
+Process Dependencies / Airflow Dataset → appropriate field
+
+Airflow Dataset Name → appropriate field
+
+Redshift Batch_Run_Status Table Entry → appropriate field(s)
+
+JIRA Number → jira_number
+
+JIRA Description → jira_description
+
+Fix Version → fix_version
+
+Critical requirement
+
+A field must NOT become NA merely because the parser did not find an exact standalone label.
+
+If the information is present anywhere in the relevant table/cell, the parser must extract it using the surrounding labels and cell structure.
+
+Preserve the current Developer Agent functionality and DAG-generation logic.
+
+Do not repeatedly run Streamlit. Do not start the Streamlit server.
+
+Inspect the existing parser first, identify why populated fields are becoming NA, make the parser fix in one pass, and perform only one final static syntax validation.
+
+At the end, show the parsed output for the sample intake form and verify that ORC Based, PS_BMO_DEPT_MAP, the ORC dependency, Glue job name, Jira Description, and Fix Version are no longer NA.
+the Developer Agent should parse based on the semantic structure of the intake form
